@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 var request = require('request');
-var sort = require("./js/sort.js")
+var sortJS = require("./js/sort.js")
 
 var CLIENT_ID = '16e4d098754ab5be4fcc',
     CLIENT_SECRET = '4e09d95dd6619fd7e9d066521eaeda3d071184d6';
@@ -56,40 +56,62 @@ app.get('/tutors', function(req, res){
      },
      function (error, response, data){
         var tutorJSON = {};
-        console.log(data[1213]);
-         for(i=0; i<data.length; i++){ //FOR EACH FOLLOWER
+        var followerJSON = JSON.parse(data);
+        // console.log(followerJSON);
+         for(i=0; i<followerJSON.length; i++){ //FOR EACH FOLLOWER
             (function(i){  
-              // console.log(i);
               var all_languages = []; //INITIALIZE EMPTY LANGUAGES ARRAY
-              // request(data[i].repos_url, function(error, response, repo_data){ //GET LIST OF REPOS OF FOLLOWER
-              //   // console.log(repo_data);
-              //   // for(k=0; k<repo_data.length; k++){ //FOR EACH REPO
-              //   //   (function(k){
-              //   //     request(repo_data[k].languages_url, function(error, response, language_data){ //GET LIST OF LANGUAGES
-              //   //       // $('#list ul').append('<li>'+Object.keys(language_data)+'</li>');
-              //   //       var lang = Object.keys(language_data);
-              //   //       if(lang!=null){
-              //   //         for(b=0; b<lang.length; b++)
-              //   //         {
-              //   //           all_languages.push(lang[b]); //PUSH LANGUAGES TO LANGUAGES ARRAY
-              //   //         }
-                        
-              //   //       } 
-              //   //       if(k==repo_data.length-1)
-              //   //       {
-              //   //         // $('#list ul:nth-child('+(i+1)+')').append('<li>'+sortByFrequencyAndRemoveDuplicates(all_languages)+'</li>');
-              //   //         tutorJSON[data[i].login] = sort(all_languages);
-              //   //       }
+              request(
+                 {
+                     url : followerJSON[i].repos_url,
+                     headers : {
+                        "Authorization" : "token "+ actualToken,
+                         "User-Agent": "samkho10",
+                     }
+                 },
+              function(error, response, repo_data){ //GET LIST OF REPOS OF FOLLOWER
+                var repo_dataJSON = JSON.parse(repo_data);
+                // console.log(repo_dataJSON);
+                for(k=0; k<repo_dataJSON.length; k++){ //FOR EACH REPO
+                  (function(k){
+                     request(
+                       {
+                           url : repo_dataJSON[k].languages_url,
+                           headers : {
+                               "Authorization" : "token "+ actualToken,
+                               "User-Agent": "samkho10",
+                           }
+                       }, 
+                      function(error, response, language_data){ //GET LIST OF LANGUAGES
+                        var language_dataJSON = JSON.parse(language_data);
+                        // console.log(language_dataJSON);
+                        var lang = Object.keys(language_dataJSON);
+                        if(lang!=null){
+                          for(b=0; b<lang.length; b++)
+                          {
+                            all_languages.push(lang[b]); //PUSH LANGUAGES TO LANGUAGES ARRAY
+                          }
+                          
+                        } 
+                        if(k==repo_dataJSON.length-1)
+                        {
+                          tutorJSON[followerJSON[i].login] = sortJS.sort(all_languages);
+                          // console.log(tutorJSON);
+                          if(i==followerJSON.length-1){
+                            res.render(__dirname + '/index.jade', {
+                              following: tutorJSON,
+                            });
+                          }
+
+                        }
                       
-              //   //     })
-              //   //   })(k);
-              //   // }
-              // });
+                    })
+                  })(k);
+                }
+              });
             })(i);
           }
-         res.render(__dirname + '/index.jade', {
-            following: JSON.stringify(tutorJSON),
-        });
+         
      });
 });
 
