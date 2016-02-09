@@ -1,0 +1,26 @@
+{
+  "name": "git-tutor",
+  "version": "1.0.0",
+  "description": "Easy way to assist your followers using languages you know.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "GitHub",
+    "GitHub",
+    "API",
+    "Learning"
+  ],
+  "author": "Sameer Khoja",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.3",
+    "github-api": "^0.10.7",
+    "jade": "^1.11.0",
+    "jquery": "^2.2.0",
+    "request": "^2.67.0",
+    "simple-oauth2": "^0.3.0"
+  },
+  "devDependencies": {}
+}
