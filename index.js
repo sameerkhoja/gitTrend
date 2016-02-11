@@ -13,20 +13,20 @@ var oauth2 = require('simple-oauth2')({
   tokenPath: '/oauth/access_token',
   authorizationPath: '/oauth/authorize'
 });
- 
-// Authorization uri definition 
+
+// Authorization uri definition
 var authorization_uri = oauth2.authCode.authorizeURL({
   redirect_uri: 'http://localhost:3000/callback',
   scope: 'notifications',
   state: '3(#0/!~'
 });
- 
-// Initial page redirecting to Github 
+
+// Initial page redirecting to Github
 app.get('/auth', function (req, res) {
     res.redirect(authorization_uri);
 });
- 
-// Callback service parsing the authorization token and asking for the access token 
+
+// Callback service parsing the authorization token and asking for the access token
 app.get('/callback', function (req, res) {
   var code = req.query.code;
   oauth2.authCode.getToken({
@@ -48,7 +48,7 @@ app.get('/tutors', function(req, res){
   var actualToken = oauth2.accessToken.token.split('&')[0].split('=')[1];
    request(
      {
-         url : 'https://api.github.com/user/followers',
+         url : 'https://api.github.com/user/following',
          headers : {
              "Authorization" : "token "+ actualToken,
              "User-Agent": "samkho10",
@@ -59,7 +59,7 @@ app.get('/tutors', function(req, res){
         var followerJSON = JSON.parse(data);
         // console.log(followerJSON);
          for(i=0; i<followerJSON.length; i++){ //FOR EACH FOLLOWER
-            (function(i){  
+            (function(i){
               var all_languages = []; //INITIALIZE EMPTY LANGUAGES ARRAY
               request(
                  {
@@ -81,7 +81,7 @@ app.get('/tutors', function(req, res){
                                "Authorization" : "token "+ actualToken,
                                "User-Agent": "samkho10",
                            }
-                       }, 
+                       },
                       function(error, response, language_data){ //GET LIST OF LANGUAGES
                         var language_dataJSON = JSON.parse(language_data);
                         // console.log(language_dataJSON);
@@ -91,50 +91,37 @@ app.get('/tutors', function(req, res){
                           {
                             all_languages.push(lang[b]); //PUSH LANGUAGES TO LANGUAGES ARRAY
                           }
-                          
-                        } 
+
+                        }
                         if(k==repo_dataJSON.length-1)
                         {
                           tutorJSON[followerJSON[i].login] = sortJS.sort(all_languages);
-                          // console.log(tutorJSON);
+                          console.log(tutorJSON);
                           if(i==followerJSON.length-1){
+                            console.log(followerJSON.length);
+                            // console.log(tutorJSON);
                             res.render(__dirname + '/index.jade', {
                               following: tutorJSON,
                             });
                           }
 
                         }
-                      
+
                     })
                   })(k);
                 }
               });
             })(i);
           }
-         
+
      });
 });
 
-// function greeting(){
-//   var actualToken = oauth2.accessToken.token;
-//   console.log(actualToken);
-//   // request("https://api.github.com/user" + "?" + token.token)
-//   // console.log('Hi, %s', username);
-// }
- 
+
 app.get('/', function (req, res) {
   res.send('Hello<br><a href="/auth">Log in with Github</a>');
 });
- 
+
 app.listen(3000);
- 
+
 console.log('Express server started on port 3000');
-
-
-
-
-
- 
-// app.listen(3000);
- 
-// console.log('Express server started on port 3000');
