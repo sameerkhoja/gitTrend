@@ -43,79 +43,129 @@ app.get('/callback', function (req, res) {
 
 });
 
-
 app.get('/tutors', function(req, res){
-  var actualToken = oauth2.accessToken.token.split('&')[0].split('=')[1];
-   request(
-     {
-         url : 'https://api.github.com/user/following',
-         headers : {
-             "Authorization" : "token "+ actualToken,
-             "User-Agent": "samkho10",
-         }
-     },
-     function (error, response, data){
-        var tutorJSON = {};
-        var followerJSON = JSON.parse(data);
-        // console.log(followerJSON);
-         for(i=0; i<followerJSON.length; i++){ //FOR EACH FOLLOWER
-            (function(i){
-              var all_languages = []; //INITIALIZE EMPTY LANGUAGES ARRAY
-              request(
-                 {
-                     url : followerJSON[i].repos_url,
-                     headers : {
-                        "Authorization" : "token "+ actualToken,
-                         "User-Agent": "samkho10",
-                     }
-                 },
-              function(error, response, repo_data){ //GET LIST OF REPOS OF FOLLOWER
-                var repo_dataJSON = JSON.parse(repo_data);
-                // console.log(repo_dataJSON);
-                for(k=0; k<repo_dataJSON.length; k++){ //FOR EACH REPO
-                  (function(k){
-                     request(
-                       {
-                           url : repo_dataJSON[k].languages_url,
-                           headers : {
-                               "Authorization" : "token "+ actualToken,
-                               "User-Agent": "samkho10",
-                           }
-                       },
-                      function(error, response, language_data){ //GET LIST OF LANGUAGES
-                        var language_dataJSON = JSON.parse(language_data);
-                        // console.log(language_dataJSON);
-                        var lang = Object.keys(language_dataJSON);
-                        if(lang!=null){
-                          for(b=0; b<lang.length; b++)
-                          {
-                            all_languages.push(lang[b]); //PUSH LANGUAGES TO LANGUAGES ARRAY
-                          }
-
-                        }
-                        if(k==repo_dataJSON.length-1)
-                        {
-                          tutorJSON[followerJSON[i].login] = sortJS.sort(all_languages);
-                          console.log(tutorJSON);
-                          if(i==followerJSON.length-1){
-                            console.log(followerJSON.length);
-                            // console.log(tutorJSON);
-                            res.render(__dirname + '/index.jade', {
-                              following: tutorJSON,
-                            });
-                          }
-
-                        }
-
-                    })
-                  })(k);
-                }
-              });
-            })(i);
-          }
-
-     });
+  getFollowers();
 });
+
+
+var getFollowers = function(){
+
+    var actualToken = oauth2.accessToken.token.split('&')[0].split('=')[1];
+    var requestHeaders =
+    {
+        "Authorization" : "token "+ actualToken,
+        "User-Agent": "samkho10",
+    };
+      request({url : 'https://api.github.com/user/following',headers: requestHeaders}, function (error, response, follower_data)
+        {getRepos(follower_data);}
+      );
+};
+
+var getRepos = function(data){
+  var tutorJSON = {};
+  var followerJSON = JSON.parse(data);
+  // console.log(followerJSON);
+  for(i=0; i<followerJSON.length; i++){ //FOR EACH FOLLOWER
+    (function(i){
+      var all_languages = []; //INITIALIZE EMPTY LANGUAGES ARRAY
+      request({url:followerJSON[i].repos_url, headers:requestHeaders},function(error, response, repo_data){
+        var repo_dataJSON = JSON.parse(repo_data);
+        // console.log(repo_dataJSON);
+        for(k=0; k<repo_dataJSON.length; k++){ //FOR EACH REPO
+          (function(k){
+             request({url:repo_dataJSON[k].languages_url, headers:requestHeaders},function(error, response, language_data){
+              {getLanguages(language_data);}
+            });
+          })(k);
+        }
+      })
+    })(i);
+  }
+};
+
+var getLanguages = function(language_data){
+  var language_dataJSON = JSON.parse(language_data);
+  // console.log(language_dataJSON);
+  var lang = Object.keys(language_dataJSON);
+  if(lang!=null){
+    for(b=0; b<lang.length; b++)
+    {all_languages.push(lang[b]);} //PUSH LANGUAGES TO LANGUAGES ARRAY
+  }
+  if(k==repo_dataJSON.length-1)
+  {
+    tutorJSON[followerJSON[i].login] = sortJS.sort(all_languages);
+    // console.log(tutorJSON);
+    if(i==followerJSON.length-1){
+      console.log(followerJSON.length);
+      // console.log(tutorJSON);
+      res.render(__dirname + '/index.jade', {
+        following: tutorJSON,
+      });
+     }
+
+  }
+};
+
+
+
+
+
+//
+// app.get('/tutors', function(req, res){
+//   var actualToken = oauth2.accessToken.token.split('&')[0].split('=')[1];
+//   var requestHeaders =
+//   {
+//       "Authorization" : "token "+ actualToken,
+//       "User-Agent": "samkho10",
+//   };
+//    request({url : 'https://api.github.com/user/following',headers: requestHeaders}, function (error, response, data){
+//     var tutorJSON = {};
+//     var followerJSON = JSON.parse(data);
+//     // console.log(followerJSON);
+//      for(i=0; i<followerJSON.length; i++){ //FOR EACH FOLLOWER
+//         (function(i){
+//           var all_languages = []; //INITIALIZE EMPTY LANGUAGES ARRAY
+//           request({url:followerJSON[i].repos_url, headers:requestHeaders},function(error, response, repo_data){ //GET LIST OF REPOS OF FOLLOWER
+//             var repo_dataJSON = JSON.parse(repo_data);
+//             // console.log(repo_dataJSON);
+//             for(k=0; k<repo_dataJSON.length; k++){ //FOR EACH REPO
+//               (function(k){
+//                  request({url:repo_dataJSON[k].languages_url, headers:requestHeaders},function(error, response, language_data){ //GET LIST OF LANGUAGES
+//                     var language_dataJSON = JSON.parse(language_data);
+//                     // console.log(language_dataJSON);
+//                     var lang = Object.keys(language_dataJSON);
+//                     if(lang!=null){
+//                       for(b=0; b<lang.length; b++)
+//                       {
+//                         all_languages.push(lang[b]); //PUSH LANGUAGES TO LANGUAGES ARRAY
+//                       }
+//
+//                     }
+//                     if(k==repo_dataJSON.length-1)
+//                     {
+//                       tutorJSON[followerJSON[i].login] = sortJS.sort(all_languages);
+//                       // console.log(tutorJSON);
+//                       if(i==followerJSON.length-1){
+//                         console.log(followerJSON.length);
+//                         // console.log(tutorJSON);
+//                         res.render(__dirname + '/index.jade', {
+//                           following: tutorJSON,
+//                         });
+//                        }
+//
+//                     }
+//
+//                 })
+//               })(k);
+//             }
+//           });
+//         })(i);
+//       }
+//
+//  });
+// });
+
+
 
 
 app.get('/', function (req, res) {
