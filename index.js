@@ -38,6 +38,7 @@ app.get('/callback', function (req, res) {
     if (error) { console.log('Access Token Error', error.message); }
     token = oauth2.accessToken.create(result);
     res.redirect('/tutors');
+    console.log("authorization successful");
   }
 
 
@@ -51,30 +52,36 @@ app.get('/tutors', function(req, res){
 var getFollowers = function(){
 
     var actualToken = oauth2.accessToken.token.split('&')[0].split('=')[1];
-    var requestHeaders =
+    requestHeaders =
     {
         "Authorization" : "token "+ actualToken,
-        "User-Agent": "samkho10",
+        "User-Agent": "samkho10"
     };
       request({url : 'https://api.github.com/user/following',headers: requestHeaders}, function (error, response, follower_data)
-        {getRepos(follower_data);}
+        {getRepos(follower_data);
+          console.log("got followers");
+        }
       );
 };
 
 var getRepos = function(data){
   var tutorJSON = {};
   var followerJSON = JSON.parse(data);
-  // console.log(followerJSON);
+  console.log(followerJSON);
   for(i=0; i<followerJSON.length; i++){ //FOR EACH FOLLOWER
     (function(i){
-      var all_languages = []; //INITIALIZE EMPTY LANGUAGES ARRAY
+      all_languages = []; //INITIALIZE EMPTY LANGUAGES ARRAY
       request({url:followerJSON[i].repos_url, headers:requestHeaders},function(error, response, repo_data){
-        var repo_dataJSON = JSON.parse(repo_data);
+        console.log("got repos");
+        repo_dataJSON = JSON.parse(repo_data);
         // console.log(repo_dataJSON);
         for(k=0; k<repo_dataJSON.length; k++){ //FOR EACH REPO
           (function(k){
              request({url:repo_dataJSON[k].languages_url, headers:requestHeaders},function(error, response, language_data){
-              {getLanguages(language_data);}
+              {
+                getLanguages(language_data);
+                console.log("got languages");
+              }
             });
           })(k);
         }
@@ -84,16 +91,22 @@ var getRepos = function(data){
 };
 
 var getLanguages = function(language_data){
+  // console.log("calling getlanguages function");
   var language_dataJSON = JSON.parse(language_data);
   // console.log(language_dataJSON);
   var lang = Object.keys(language_dataJSON);
   if(lang!=null){
     for(b=0; b<lang.length; b++)
-    {all_languages.push(lang[b]);} //PUSH LANGUAGES TO LANGUAGES ARRAY
+    {all_languages.push(lang[b]);}
+    console.log("pushed to languages array");
+    //PUSH LANGUAGES TO LANGUAGES ARRAY
   }
+  console.log(k);
+  console.log(repo_dataJSON.length)
   if(k==repo_dataJSON.length-1)
   {
     tutorJSON[followerJSON[i].login] = sortJS.sort(all_languages);
+    console.log("sorted all languages");
     // console.log(tutorJSON);
     if(i==followerJSON.length-1){
       console.log(followerJSON.length);
