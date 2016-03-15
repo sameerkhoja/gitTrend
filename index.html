@@ -11,9 +11,11 @@
 <head>
 	<title>GitTutor</title>
 </head>
-<body ng-app="ngApp">
-
-
-
+<body ng-controller="LangCtrl">
+  <ul>
+    <li ng-repeat="lang in languages">
+      {{todo.text}} - <em>{{todo.done}}</em>
+    </li>
+  </ul>
 </body>
 </html>

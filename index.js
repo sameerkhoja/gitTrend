@@ -1,7 +1,10 @@
 var express = require('express');
 var app = express();
 var request = require('request');
-var sortJS = require("./js/sort.js")
+var sortJS = require("./js/sort.js");
+var jsonfile = require('jsonfile');
+var json = 'data.json';
+
 
 var CLIENT_ID = '16e4d098754ab5be4fcc',
     CLIENT_SECRET = '4e09d95dd6619fd7e9d066521eaeda3d071184d6';
@@ -65,7 +68,7 @@ var getFollowers = function(){
 };
 
 var getRepos = function(data){
-  var tutorJSON = {};
+  var tutorJSON = [];
   var followerJSON = JSON.parse(data);
   console.log(followerJSON);
   for(i=0; i<followerJSON.length; i++){ //FOR EACH FOLLOWER
@@ -80,7 +83,29 @@ var getRepos = function(data){
              request({url:repo_dataJSON[k].languages_url, headers:requestHeaders},function(error, response, language_data){
               {
                 getLanguages(language_data);
-                console.log("got languages");
+                if(k==repo_dataJSON.length-1)
+                {
+                  var userJSON = {};
+                  var username = "username";
+                  var languages = "languages";
+                  userJSON[username] = followerJSON[i].login;
+                  userJSON[languages] = sortJS.sort(all_languages);
+                  tutorJSON.push(userJSON);
+                  console.log("sorted all languages");
+                  // console.log(tutorJSON);
+                  if(i==followerJSON.length-1){
+                    console.log(followerJSON.length);
+                    console.log(tutorJSON);
+                    jsonfile.writeFile(json, tutorJSON, function(err){
+                      console.error(err);
+                      console.log("wrote data to json file!");
+                    });
+                    // res.render(__dirname + '/index.jade', {
+                    //   following: tutorJSON,
+                    // });
+                   }
+
+                }
               }
             });
           })(k);
@@ -102,21 +127,21 @@ var getLanguages = function(language_data){
     //PUSH LANGUAGES TO LANGUAGES ARRAY
   }
   console.log(k);
-  console.log(repo_dataJSON.length)
-  if(k==repo_dataJSON.length-1)
-  {
-    tutorJSON[followerJSON[i].login] = sortJS.sort(all_languages);
-    console.log("sorted all languages");
-    // console.log(tutorJSON);
-    if(i==followerJSON.length-1){
-      console.log(followerJSON.length);
-      // console.log(tutorJSON);
-      res.render(__dirname + '/index.jade', {
-        following: tutorJSON,
-      });
-     }
-
-  }
+  console.log(repo_dataJSON.length);
+  // if(k==repo_dataJSON.length-1)
+  // {
+  //   tutorJSON[followerJSON[i].login] = sortJS.sort(all_languages);
+  //   console.log("sorted all languages");
+  //   // console.log(tutorJSON);
+  //   if(i==followerJSON.length-1){
+  //     console.log(followerJSON.length);
+  //     // console.log(tutorJSON);
+  //     res.render(__dirname + '/index.jade', {
+  //       following: tutorJSON,
+  //     });
+  //    }
+  //
+  // }
 };
 
 
