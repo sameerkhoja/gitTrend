@@ -4,6 +4,9 @@ var request = require('request');
 var sortJS = require("./js/sort.js");
 var jsonfile = require('jsonfile');
 var json = 'data.json';
+var sleep = require('sleep');
+
+app.set('view engine', 'pug');
 
 
 var CLIENT_ID = '16e4d098754ab5be4fcc',
@@ -42,30 +45,50 @@ app.get('/callback', function (req, res) {
     token = oauth2.accessToken.create(result);
     res.redirect('/tutors');
     console.log("authorization successful");
+    // console.log('auth')
   }
 
 
 });
 
+app.use('/tutors', function(req, res, next){
+  var actualToken = oauth2.accessToken.token.split('&')[0].split('=')[1];
+  requestHeaders =
+  {
+      "Authorization" : "token "+ actualToken,
+      "User-Agent": "samkho10"
+  };
+    request({url : 'https://api.github.com/user/following',headers: requestHeaders}, function (error, response, follower_data)
+      {
+        var tutor_array = [];
+        var follower_data_array = JSON.parse(follower_data);
+
+        var counter = 0;
+        follower_data_array.forEach(function(follower){
+          request({url:follower.repos_url, headers:requestHeaders}, function(error, response, repo_data){
+            var repo_data_array = JSON.parse(repo_data);
+            tutor_array.push({
+              username: repo_data_array[0].owner.login,
+              language: repo_data_array[0].language
+            });
+            if(tutor_array.length == follower_data_array.length)
+              res.render('tutors', {title: 'GitTutor', followers: tutor_array});
+          });
+        // var render = function(){
+        //
+        //   // console.log(tutor_array);
+        // }
+        // counter++;
+        // // console.log('counter is at '+counter);
+        // if(counter == follower_data_array.length)
+        //   render();
+        });
+      });
+})
+
 app.get('/tutors', function(req, res){
-  getFollowers();
+
 });
-
-
-var getFollowers = function(){
-
-    var actualToken = oauth2.accessToken.token.split('&')[0].split('=')[1];
-    requestHeaders =
-    {
-        "Authorization" : "token "+ actualToken,
-        "User-Agent": "samkho10"
-    };
-      request({url : 'https://api.github.com/user/following',headers: requestHeaders}, function (error, response, follower_data)
-        {getRepos(follower_data);
-          console.log("got followers");
-        }
-      );
-};
 
 var getRepos = function(data){
   var tutorJSON = [];
