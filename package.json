@@ -20,7 +20,6 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.13.3",
-    "github-api": "^0.10.7",
     "jade": "^1.11.0",
     "jquery": "^2.2.0",
     "jsonfile": "^2.2.3",
