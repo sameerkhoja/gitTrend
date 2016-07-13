@@ -1,9 +1,5 @@
-# gitTutor
-Learn your favorite languages from your favorite people!
+# GitTrend
+========
+Discover new languages from the people you follow.
 
-## Usage
-Simply clone the repo and run:
-```bash
-node index.js
-```
-and it should be running in your port 3000.
+## Demo
