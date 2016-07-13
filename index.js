@@ -1,7 +1,6 @@
 var express = require('express');
 var app = express();
 var request = require('request');
-var sleep = require('sleep');
 
 
 //USING PUG AS VIEW ENGINE
