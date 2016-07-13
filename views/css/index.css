@@ -1,0 +1,18 @@
+body{
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+}
+
+h1{
+  padding-top: 4em;
+  font-size: 3em;
+}
+
+h3 {
+  padding-bottom: 1em;
+}
+
+a {
+  width: 13em !important;
+  margin: 0 auto;
+}
