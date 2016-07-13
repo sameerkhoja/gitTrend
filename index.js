@@ -21,7 +21,7 @@ var oauth2 = require('simple-oauth2')({
 
 // AUTHORIZATION URI DEFINITION
 var authorization_uri = oauth2.authCode.authorizeURL({
-  redirect_uri: 'http://localhost:3000/callback',
+  redirect_uri: 'http://sheltered-garden-49889.herokuapp.com/callback',
   scope: 'notifications',
   state: '3(#0/!~'
 });
@@ -36,7 +36,7 @@ app.get('/callback', function (req, res) {
   var code = req.query.code;
   oauth2.authCode.getToken({
     code: code,
-    redirect_uri: 'http://localhost:3000/callback'
+    redirect_uri: 'http://sheltered-garden-49889.herokuapp.com/callback'
   }, saveTokenandGetTutors);
 
   function saveTokenandGetTutors(error, result) {
