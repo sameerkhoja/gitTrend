@@ -68,7 +68,7 @@ app.use('/tutors', function(req, res, next){
               language: repo_data_array[0].language,
           });
           if(tutor_array.length == follower_data_array.length)
-            res.render('tutors', {title: 'GitTutor', followers: tutor_array});
+            res.render('tutors', {title: 'GitTrend', followers: tutor_array});
           });
         });
       });
