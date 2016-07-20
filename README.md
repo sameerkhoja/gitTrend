@@ -1,6 +1,10 @@
 # GitTrend
 ========
-Discover new languages from the people you follow. Created with Node.js.
+A NodeJS app that provides insight on what languages your fellow devs on GitHub are working with. Pull requests are much appreciated!
 
 ##Demo
 ![alt tag](https://github.com/samkho10/gitTrend/blob/master/demo.gif)
+
+
+##License
+MIT
