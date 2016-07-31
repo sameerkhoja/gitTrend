@@ -80,7 +80,7 @@ app.use('/tutors', function(req, res, next){
             for(var i = 0; i<repo_data_array.length; i++){
               language_array.push(repo_data_array[i].language);
             };
-            console.log(language_array);
+            console.log("languages for " + repo_data_array[0].owner.login+": "+language_array);
             tutor_array.push({
               username: repo_data_array[0].owner.login,
               language: mode(language_array)
